@@ -37,7 +37,7 @@ head = sample_loader.load_head_phantom(geo.nVoxel)
 proj = tigre.Ax(head, geo, angles, gpuids=gpuids)
 test = tigre.Atb(proj,geo,angles,backprojection_type="matched",gpuids=gpuids)
 # Reconstruct
-niter = 20
+niter = 40
 fdkout = algs.fdk(proj, geo, angles, gpuids=gpuids)
 ossart = algs.ossart(proj, geo, angles, niter, blocksize=20, gpuids=gpuids)
 
@@ -59,6 +59,7 @@ axes[0, 1].imshow(ossart[geo.nVoxel[0] // 2])
 axes[1, 1].imshow(ossart[:, geo.nVoxel[1] // 2, :])
 axes[2, 1].imshow(ossart[:, :, geo.nVoxel[2] // 2])
 plt.show()
+plt.savefig("teset.png")
 # tigre.plotProj(proj)
 # tigre.plotImg(fdkout)
 
