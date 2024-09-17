@@ -9,6 +9,7 @@ from tigre.utilities.Measure_Quality import Measure_Quality
 import tigre.utilities.gpu as gpu
 import matplotlib.pyplot as plt
 import os
+from time import time
 ### This is just a basic example of very few TIGRE functionallity.
 # We hihgly recomend checking the Demos folder, where most if not all features of tigre are demoed.
 
@@ -22,9 +23,11 @@ else:
 gpuids = gpu.getGpuIds(listGpuNames[0])
 print(gpuids)
 
+gpuids.devices = [0]
+print(gpuids)
 # Geometry
-# geo1 = tigre.geometry(mode='cone', high_resolution=False, default=True)
-geo = tigre.geometry(mode="cone", nVoxel=np.array([256, 256, 256]), default=True)
+geo = tigre.geometry(mode='cone', high_resolution=True, default=True)
+# geo = tigre.geometry(mode="cone", nVoxel=np.array([256, 256, 256]), default=True)
 geo.dDetector = np.array([0.8, 0.8]) * 2  # size of each pixel            (mm)
 geo.sDetector = geo.dDetector * geo.nDetector
 # print(geo)
@@ -37,10 +40,20 @@ head = sample_loader.load_head_phantom(geo.nVoxel)
 proj = tigre.Ax(head, geo, angles, gpuids=gpuids)
 test = tigre.Atb(proj,geo,angles,backprojection_type="matched",gpuids=gpuids)
 # Reconstruct
+<<<<<<< Updated upstream
 niter = 20
 fdkout = algs.fdk(proj, geo, angles, gpuids=gpuids)
 ossart = algs.ossart(proj, geo, angles, niter, blocksize=20, gpuids=gpuids)
+=======
+niter = 40
+>>>>>>> Stashed changes
 
+t0 = time()
+fdkout = algs.fdk(proj, geo, angles, gpuids=gpuids)
+print(f"FDK: {time()-t0:.3f} s")
+t0 = time()
+ossart = algs.ossart(proj, geo, angles, niter, blocksize=20, gpuids=gpuids)
+print(f"OSSART: {time()-t0:.3f} s")
 # Measure Quality
 # 'RMSE', 'MSSIM', 'SSD', 'UQI'
 print("RMSE fdk:")
@@ -59,6 +72,10 @@ axes[0, 1].imshow(ossart[geo.nVoxel[0] // 2])
 axes[1, 1].imshow(ossart[:, geo.nVoxel[1] // 2, :])
 axes[2, 1].imshow(ossart[:, :, geo.nVoxel[2] // 2])
 plt.show()
+<<<<<<< Updated upstream
+=======
+plt.savefig("test.png")
+>>>>>>> Stashed changes
 # tigre.plotProj(proj)
 # tigre.plotImg(fdkout)
 

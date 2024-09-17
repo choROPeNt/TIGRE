@@ -9,9 +9,11 @@ print("===================")
 
 # Choose one of them
 # targetGpuName=''  # noqa: N816
-targetGpuName = "GeForce GTX 1060 6GB"  # noqa: N816
+# targetGpuName = "GeForce GTX 1060 6GB"  # noqa: N816
 # targetGpuName = 'GeForce RTX 2080 Ti'  # noqa: N816
 # targetGpuName = 'GeForce GTX 1070'  # noqa: N816
+
+targetGpuName = 'NVIDIA A100-SXM4-40GB'  # noqa: N816
 
 # You can get the list of GPU IDs
 gpuids = gpu.getGpuIds(targetGpuName)
@@ -42,8 +44,9 @@ print("\t gpuids: {}".format(gpuids))
 #    gpuids.devices = int32(2:3);
 
 gpuids = gpu.GpuIds()
-gpuids.devices = list(range(0, 10))
-print(gpuids)
+# gpuids.devices = list(range(0, 10))
 
-gpuids2080 = gpu.GpuIds("GeForce RTX 2080 Ti")
-print(gpuids2080)
+print(gpuids.devices)
+
+# gpuids2080 = gpu.GpuIds("GeForce RTX 2080 Ti")
+# print(gpuids2080)
