@@ -113,6 +113,12 @@ def read_Bruker_geometry(filepath, **kwargs):
     ratio = 1
 
     cfg_aq = cfg["Acquisition"]
+    if cfg.has_option("Acquisition", "Resized in image"):
+        resizing_correction = float(cfg_aq["Resized in image"])
+    else:
+        resizing_correction = 1.0
+
+ 
     try:
         binu = float(cfg_aq["Camera binning"][0])
         binv = float(cfg_aq["Camera binning"][2])
@@ -122,8 +128,8 @@ def read_Bruker_geometry(filepath, **kwargs):
 
     geometry.dDetector = numpy.array(
         (
-            float(cfg_system["Camera Pixel Size (um)"]) / 1000.0 * binv * ratio,
-            float(cfg_system["Camera Pixel Size (um)"]) / 1000.0 * binu,
+            float(cfg_system["Camera Pixel Size (um)"]) / 1000.0 * binv * ratio * resizing_correction,
+            float(cfg_system["Camera Pixel Size (um)"]) / 1000.0 * binu * resizing_correction,
         )
     )
     # Number of pixel in the detector
