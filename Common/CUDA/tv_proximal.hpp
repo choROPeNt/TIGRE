@@ -1,8 +1,8 @@
 /*-------------------------------------------------------------------------
  *
- * Header for CUDA functions for Steepest descend in POCS-type algorithms.
+ * Header MATLAB MEX  functions for TV image denoising. Check inputs and parses 
+ * MATLAB data to C++ data.
  *
- * This file has the required headers for POCS_TV.cu
  *
  * CODE by       Ander Biguri
  *
@@ -44,18 +44,13 @@ Codes  : https://github.com/CERN/TIGRE
 --------------------------------------------------------------------------- 
  */
 
-
-
-
-
-
-
-#ifndef POCS_TV_HPP
-#define POCS_TV_HPP
+#ifndef TVDENOISE
+#define TVDENOISE
 #include "TIGRE_common.hpp"
 #include "GpuIds.hpp"
 
-void aw_pocs_tv(float* img,float* dst,float alpha,const long* image_size, int maxIter,const float delta, const GpuIds& gpuids);
+void tvdenoising(float* src, float* dst, float lambda,
+                 const float* spacing,const long* image_size, int maxIter, const GpuIds& gpuids);
 void checkFreeMemory(const GpuIds& gpuids, size_t *mem_GPU_global);
 
 

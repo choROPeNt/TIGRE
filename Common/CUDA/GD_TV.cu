@@ -2,7 +2,7 @@
  *
  * CUDA functions for Steepest descend in POCS-type algorithms.
  *
- * This file will iteratively minimize by stepest descend the total variation
+ * This file will iteratively minimize by steepest descend the total variation
  * of the input image, with the parameters given, using GPUs.
  *
  * CODE by       Ander Biguri
@@ -54,7 +54,7 @@
 #define MAXTHREADS 1024
 #define MAX_BUFFER 60
 
-#include "POCS_TV.hpp"
+#include "GD_TV.hpp"
 #include "gpuUtils.hpp"
 
 
@@ -65,7 +65,7 @@ do { \
         if (__err != cudaSuccess) { \
                 mexPrintf("%s \n",msg);\
                 cudaDeviceReset();\
-                mexErrMsgIdAndTxt("POCS_TV:GPU",cudaGetErrorString(__err));\
+                mexErrMsgIdAndTxt("GD_TV:GPU",cudaGetErrorString(__err));\
         } \
 } while (0)
     
@@ -261,7 +261,7 @@ do { \
         int deviceCount = gpuids.GetLength();
         cudaCheckErrors("Device query fail");
         if (deviceCount == 0) {
-            mexErrMsgIdAndTxt("POCS_TV:GPU","There are no available device(s) that support CUDA\n");
+            mexErrMsgIdAndTxt("GD_TV:GPU","There are no available device(s) that support CUDA\n");
         }
         //
         // CODE assumes
@@ -269,7 +269,7 @@ do { \
         // 2.-All available devices are equal, they are the same machine (warning thrown)
         // Check the available devices, and if they are the same
         if (!gpuids.AreEqualDevices()) {
-            mexWarnMsgIdAndTxt("minimizeTV:POCS_TV:GPUselect","Detected one (or more) different GPUs.\n This code is not smart enough to separate the memory GPU wise if they have different computational times or memory limits.\n First GPU parameters used. If the code errors you might need to change the way GPU selection is performed.");
+            mexWarnMsgIdAndTxt("minimizeTV:GD_TV:GPUselect","Detected one (or more) different GPUs.\n This code is not smart enough to separate the memory GPU wise if they have different computational times or memory limits.\n First GPU parameters used. If the code errors you might need to change the way GPU selection is performed.");
         }
         
         int dev;
@@ -339,7 +339,7 @@ do { \
 
             // Assert
             if (mem_GPU_global< 3*mem_img_each_GPU+mem_auxiliary){
-                mexErrMsgIdAndTxt("POCS_TV:GPU","Assertion Failed. Logic behind spliting flawed! Please tell: ander.biguri@gmail.com\n");
+                mexErrMsgIdAndTxt("GD_TV:GPU","Assertion Failed. Logic behind splitting flawed! Please tell: ander.biguri@gmail.com\n");
             }
         }
         
@@ -347,7 +347,7 @@ do { \
          // Assert
        
         if ((slices_per_split+buffer_length*2)*image_size[0]*image_size[1]* sizeof(float)!= mem_img_each_GPU){
-            mexErrMsgIdAndTxt("POCS_TV:GPU","Assertion Failed. Memory needed calculation broken! Please tell: ander.biguri@gmail.com\n");
+            mexErrMsgIdAndTxt("GD_TV:GPU","Assertion Failed. Memory needed calculation broken! Please tell: ander.biguri@gmail.com\n");
         }
         
         
@@ -379,7 +379,7 @@ do { \
        unsigned long long buffer_pixels=buffer_length*image_size[0]*image_size[1];
         float* buffer;
         if(splits>1){
-            mexWarnMsgIdAndTxt("minimizeTV:POCS_TV:Image_split","Your image can not be fully split between the available GPUs. The computation of minTV will be significantly slowed due to the image size.\nApproximated mathematics turned on for computational speed.");
+            mexWarnMsgIdAndTxt("minimizeTV:GD_TV:Image_split","Your image can not be fully split between the available GPUs. The computation of minTV will be significantly slowed due to the image size.\nApproximated mathematics turned on for computational speed.");
         }else{
             cudaMallocHost((void**)&buffer,buffer_length*image_size[0]*image_size[1]*sizeof(float));
         }
@@ -690,7 +690,7 @@ void checkFreeMemory(const GpuIds& gpuids,size_t *mem_GPU_global){
             cudaMemGetInfo(&memfree,&memtotal);
             if(dev==0) *mem_GPU_global=memfree;
             if(memfree<memtotal/2){
-                mexErrMsgIdAndTxt("POCS_TV:GPU","One (or more) of your GPUs is being heavily used by another program (possibly graphics-based).\n Free the GPU to run TIGRE\n");
+                mexErrMsgIdAndTxt("GD_TV:GPU","One (or more) of your GPUs is being heavily used by another program (possibly graphics-based).\n Free the GPU to run TIGRE\n");
             }
             cudaCheckErrors("Check mem error");
             

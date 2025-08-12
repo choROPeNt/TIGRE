@@ -1,6 +1,6 @@
 function img=cropCBCT(img,geo)
-%cropCBCT(img,geo) will crop the parts of the iamge that will not have
-% clear information anfter the reconstruction. It sets to zero everything
+%cropCBCT(img,geo) will crop the parts of the image that will not have
+% clear information after the reconstruction. It sets to zero everything
 % outside the cylinder constrained in the image, and crops a small cone
 % shape on top and bottom of the image.
 %--------------------------------------------------------------------------
@@ -21,9 +21,9 @@ function img=cropCBCT(img,geo)
 %--------------------------------------------------------------------------
 
 % Tangent is equal, cropRadious:
-cropR=(geo.sDetector(1)/2*geo.DSO)/geo.DSD;
+cropR=((geo.sDetector(1)/2+abs(geo.offDetector(1)))*geo.DSO)/geo.DSD;
 %maximum distance from O
-maxD=min(geo.nVoxel-1)/2;
+maxD=min(geo.nVoxel(1:2)-1)/2;
 
 % Crop radious will be theminimum of them
 cropR=min([cropR/geo.dVoxel(1) maxD]);

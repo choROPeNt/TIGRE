@@ -118,6 +118,26 @@
         "research",
         "code"
       ]
+    },
+    {
+      "login": "Emvlt",
+      "name": "Emilien Valat",
+      "avatar_url": "https://avatars.githubusercontent.com/u/46785587?v=4",
+      "profile": "https://emilienvalat.net/",
+      "contributions": [
+        "research",
+        "code"
+      ]
+    },
+    {
+      "login": "zezisme",
+      "name": "zez666",
+      "avatar_url": "https://avatars.githubusercontent.com/u/40331996?v=4",
+      "profile": "https://github.com/zezisme",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

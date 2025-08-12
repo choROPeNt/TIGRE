@@ -25,7 +25,7 @@ cdef extern from "numpy/arrayobject.h":
     void PyArray_ENABLEFLAGS(np.ndarray arr, int flags)
     void PyArray_CLEARFLAGS(np.ndarray arr, int flags)
 
-cdef extern from "POCS_TV2.hpp":
+cdef extern from "GD_AwTV.hpp":
     cdef void aw_pocs_tv(float* img, float* dst, float alpha, long* image_size, int maxiter, float delta, c_GpuIds gpuids)
 def cuda_raise_errors(error_code):
     if error_code:
@@ -54,6 +54,6 @@ def AwminTV(np.ndarray[np.float32_t, ndim=3] src,float alpha = 15.0,int maxiter 
     cdef np.npy_intp c_maxiter = <np.npy_intp> maxiter
     aw_pocs_tv(c_src, c_imgout, alpha, imgsize, c_maxiter, delta, c_gpuids[0])
     imgout = np.PyArray_SimpleNewFromData(3, size_img, np.NPY_FLOAT32, c_imgout)
-    PyArray_ENABLEFLAGS(imgout, np.NPY_OWNDATA)
+    PyArray_ENABLEFLAGS(imgout, np.NPY_ARRAY_OWNDATA)
 
     return imgout

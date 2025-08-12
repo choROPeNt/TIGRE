@@ -27,7 +27,7 @@ cdef extern from "numpy/arrayobject.h":
     void PyArray_ENABLEFLAGS(np.ndarray arr, int flags)
     void PyArray_CLEARFLAGS(np.ndarray arr, int flags)
 
-cdef extern from "tvdenoising.hpp":
+cdef extern from "tv_proximal.hpp":
     cdef void tvdenoising(float* src, float* dst, float lamda, float* spacing, long* image_size, int maxiter, c_GpuIds gpuids)
 
 
@@ -66,6 +66,6 @@ def tvdenoise(np.ndarray[np.float32_t, ndim=3] src, int maxiter = 100, float lam
     cuda_raise_errors(tvdenoising(c_src, c_imgout, lamda, spacing, imgsize, c_maxiter, c_gpuids[0]))
 
     imgout = np.PyArray_SimpleNewFromData(3, size_img, np.NPY_FLOAT32, c_imgout)
-    PyArray_ENABLEFLAGS(imgout, np.NPY_OWNDATA)
+    PyArray_ENABLEFLAGS(imgout, np.NPY_ARRAY_OWNDATA)
 
     return imgout

@@ -1,6 +1,6 @@
 [![Documentation Status](https://readthedocs.org/projects/tigre/badge/?version=latest)](https://tigre.readthedocs.io/en/latest/?badge=latest)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 
@@ -13,6 +13,8 @@ for improved image quality that have all been optimized to run on GPUs
 (including multi-GPUs) for improved speed. It combines the higher level 
 abstraction of MATLAB or Python with the performance of CUDA at a lower level in order to make 
 it both fast and easy to use.
+
+Read the most up to date article about tigre [here](https://iopscience.iop.org/article/10.1088/2631-8695/adbb3a).
 
 TIGRE is free to download and distribute: use it, modify it, add to it, 
 share it. Our aim is to provide a wide range of easy-to-use algorithms 
@@ -28,6 +30,8 @@ application, do not hesitate to [contact us](#contact) or open a  [discussion th
  - [TIGRE features](#features)
  
  - [Installation instructions](#installation)
+
+ - [Getting started](#getting-started)
  
  - [FAQ](#faq)
   
@@ -85,6 +89,12 @@ MATLAB and Python builds are both fully supported.
 - [Tune TIGRE for machine. Tricks to slightly speed up the code](Frontispiece/Tune_TIGRE.md)
 
 
+## Getting started
+
+Once TIGRE in installed, we strongly suggest you have a look at the Demos folder for each of the languages, [MATLAB](https://github.com/CERN/TIGRE/tree/master/MATLAB/Demos) or [Python](https://github.com/CERN/TIGRE/tree/master/Python/demos). 
+
+There is no documentation page for TIGRE (other than the function documentation), but all features are descrived and demonstrated with working code in the demos. They also serve as a tutorial of each feature. We strongly recommend you explore the first 4 demos for the basic TIGRE functionality, and look at the following ones for more advanced geometry or reconstruction functions. 
+
 ## FAQ
 
 For answers to frequently asked questions [click here](Frontispiece/FAQ.md).
@@ -116,7 +126,7 @@ The Slack team is a good place for chatting about development and questions abou
 ## Licensing
 
 The creation of TIGRE was supported by the University of Bath and CERN. It is released under the BSD License, meaning you can use and modify the software freely.  However, you **must** cite the original authors.
-For more information read [the licence file][1] or the [BSD License Definition][2].
+For more information read [the license file][1] or the [BSD License Definition][2].
 
 If you use TIGRE, please reference the following papers:
 
@@ -133,6 +143,15 @@ Boardman, Mark Mavrogordato, Manjit Dosanjh, Steven Hancock, Thomas Blumensath*
 **Journal of Parallel and Distributed Computing**
 [Read the article][4], 
 [Preprint][5]
+
+You can find the most up to date article in the TIGREv3 release paper, with most novel features well documented.
+
+**TIGRE v3: Efficient and easy to use iterative computed tomographic reconstruction toolbox for real datasets**
+*Ander Biguri, Tomoyuki Sadakane, Reuben Lindroos, Yi Liu, Malena Sabaté Landman, Yi Du, Manasavee Lohvithee, Stefanie Kaser, 
+Sepideh Hatamikia, Robert Bryll, Emilien Valat, Sarinrat Wonglee, Thomas Blumensath and Carola-Bibiane Schönlieb*
+**Engineering Research Express**
+
+[Read the article (open access)][6]
 
 ## Contributors
 
@@ -154,6 +173,8 @@ Boardman, Mark Mavrogordato, Manjit Dosanjh, Steven Hancock, Thomas Blumensath*
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Daveelvt"><img src="https://avatars.githubusercontent.com/u/16086944?v=4?s=100" width="100px;" alt="Daveelvt"/><br /><sub><b>Daveelvt</b></sub></a><br /><a href="https://github.com/CERN/TIGRE/commits?author=Daveelvt" title="Code">💻</a> <a href="#research-Daveelvt" title="Research">🔬</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/phernst"><img src="https://avatars.githubusercontent.com/u/9623894?v=4?s=100" width="100px;" alt="phernst"/><br /><sub><b>phernst</b></sub></a><br /><a href="https://github.com/CERN/TIGRE/issues?q=author%3Aphernst" title="Bug reports">🐛</a> <a href="https://github.com/CERN/TIGRE/commits?author=phernst" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/malena-sabate"><img src="https://avatars.githubusercontent.com/u/83228154?v=4?s=100" width="100px;" alt="malena-sabate"/><br /><sub><b>malena-sabate</b></sub></a><br /><a href="#research-malena-sabate" title="Research">🔬</a> <a href="https://github.com/CERN/TIGRE/commits?author=malena-sabate" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://emilienvalat.net/"><img src="https://avatars.githubusercontent.com/u/46785587?v=4?s=100" width="100px;" alt="Emilien Valat"/><br /><sub><b>Emilien Valat</b></sub></a><br /><a href="#research-Emvlt" title="Research">🔬</a> <a href="https://github.com/CERN/TIGRE/commits?author=Emvlt" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/zezisme"><img src="https://avatars.githubusercontent.com/u/40331996?v=4?s=100" width="100px;" alt="zez666"/><br /><sub><b>zez666</b></sub></a><br /><a href="https://github.com/CERN/TIGRE/issues?q=author%3Azezisme" title="Bug reports">🐛</a> <a href="https://github.com/CERN/TIGRE/commits?author=zezisme" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
@@ -176,3 +197,4 @@ Boardman, Mark Mavrogordato, Manjit Dosanjh, Steven Hancock, Thomas Blumensath*
 [3]: http://iopscience.iop.org/article/10.1088/2057-1976/2/5/055010
 [4]: https://doi.org/10.1016/j.jpdc.2020.07.004
 [5]: https://arxiv.org/abs/1905.03748
+[6]: https://iopscience.iop.org/article/10.1088/2631-8695/adbb3a

@@ -242,7 +242,7 @@ __global__ void kernelPixelBackprojection_parallel(const Geometry geo, float* im
             
             
             
-            // Get Value in the computed (U,V) and multiply by the corresponding weigth.
+            // Get Value in the computed (U,V) and multiply by the corresponding weight.
             // indAlpha is the ABSOLUTE number of projection in the projection array (NOT the current number of projection set!)
 #if IS_FOR_MATLAB_TIGRE
             voxelColumn[colIdx]+=tex3D<float>(tex, v+0.5f, u+0.5f ,indAlpha+0.5f);
@@ -396,7 +396,7 @@ int voxel_backprojection_parallel(float  *  projections, Geometry geo, float* re
         int divx,divy,divz;
         
         // RB: Use the optimal (in their tests) block size from paper by Zinsser and Keck (16 in x and 32 in y).
-        // I tried different sizes and shapes of blocks (tiles), but it does not appear to significantly affect trhoughput, so
+        // I tried different sizes and shapes of blocks (tiles), but it does not appear to significantly affect throughput, so
         // let's stick with the values from Zinsser and Keck.
         divx=16;
         divy=32;
@@ -482,18 +482,21 @@ int voxel_backprojection_parallel(float  *  projections, Geometry geo, float* re
     free(partial_projection);
     free(proj_split_size);
         
-  bool two_buffers_used=((((nalpha+split_projections-1)/split_projections)+PROJ_PER_KERNEL-1)/PROJ_PER_KERNEL)>1;
-  for(unsigned int i=0; i<2;i++){ // 2 buffers (if needed, maybe only 1)
-      if (!two_buffers_used && i==1)
-          break;            
-          cudaDestroyTextureObject(texProj[i]);
-          cudaFreeArray(d_cuArrTex[i]);
-  }
+    bool two_buffers_used=((((nalpha+split_projections-1)/split_projections)+PROJ_PER_KERNEL-1)/PROJ_PER_KERNEL)>1;
+    for(unsigned int i=0; i<2;i++){ // 2 buffers (if needed, maybe only 1)
+        if (!two_buffers_used && i==1)
+            break;            
+            cudaDestroyTextureObject(texProj[i]);
+            cudaFreeArray(d_cuArrTex[i]);
+    }
+    free(texProj);
+    
+    free(d_cuArrTex);
     cudaFreeHost(projSinCosArrayHostParallel);
     cudaFreeHost(projParamsArrayHostParallel);
     
     cudaFree(dimage);
-     if (isHostRegisterSupported){
+    if (isHostRegisterSupported){
         cudaHostUnregister(projections);
     }
     for (int i = 0; i < nStreams; ++i)

@@ -2,7 +2,7 @@
  *
  * CUDA functions for Steepest descend in POCS-type algorithms.
  *
- * This file will iteratively minimize by stepest descend the total variation
+ * This file will iteratively minimize by steepest descend the total variation
  * of the input image, with the parameters given, using GPUs.
  *
  * CODE by       Ander Biguri
@@ -54,7 +54,7 @@
 #define MAXTHREADS 1024
 #define MAX_BUFFER 60
 
-#include "POCS_TV.hpp"
+#include "GD_AwTV.hpp"
 
 
 
@@ -65,7 +65,7 @@ do { \
         if (__err != cudaSuccess) { \
                 mexPrintf("%s \n",msg);\
                 cudaDeviceReset();\
-                mexErrMsgIdAndTxt("CBCT:CUDA:POCS_TV",cudaGetErrorString(__err));\
+                mexErrMsgIdAndTxt("CBCT:CUDA:GD_TV",cudaGetErrorString(__err));\
         } \
 } while (0)
     
@@ -278,7 +278,7 @@ void aw_pocs_tv(float* img,float* dst,float alpha,const long* image_size, int ma
         int deviceCount = gpuids.GetLength();
         cudaCheckErrors("Device query fail");
         if (deviceCount == 0) {
-            mexErrMsgIdAndTxt("minimizeAwTV:POCS_TV2:GPUselect","There are no available device(s) that support CUDA\n");
+            mexErrMsgIdAndTxt("minimizeAwTV:GD_AwTV:GPUselect","There are no available device(s) that support CUDA\n");
         }
         //
         // CODE assumes
@@ -286,7 +286,7 @@ void aw_pocs_tv(float* img,float* dst,float alpha,const long* image_size, int ma
         // 2.-All available devices are equal, they are the same machine (warning thrown)
         // Check the available devices, and if they are the same
         if (!gpuids.AreEqualDevices()) {
-            mexWarnMsgIdAndTxt("minimizeAwTV:POCS_TV2:GPUselect","Detected one (or more) different GPUs.\n This code is not smart enough to separate the memory GPU wise if they have different computational times or memory limits.\n First GPU parameters used. If the code errors you might need to change the way GPU selection is performed.");
+            mexWarnMsgIdAndTxt("minimizeAwTV:GD_AwTV:GPUselect","Detected one (or more) different GPUs.\n This code is not smart enough to separate the memory GPU wise if they have different computational times or memory limits.\n First GPU parameters used. If the code errors you might need to change the way GPU selection is performed.");
         }
         int dev;
         
@@ -355,7 +355,7 @@ void aw_pocs_tv(float* img,float* dst,float alpha,const long* image_size, int ma
 
             // Assert
             if (mem_GPU_global< 3*mem_img_each_GPU+mem_auxiliary){
-                mexErrMsgIdAndTxt("minimizeAwTV:POCS_TV2:GPU","Assertion Failed. Logic behind spliting flawed! Please tell: ander.biguri@gmail.com\n");
+                mexErrMsgIdAndTxt("minimizeAwTV:GD_AwTV:GPU","Assertion Failed. Logic behind splitting flawed! Please tell: ander.biguri@gmail.com\n");
             }
         }
         
@@ -363,7 +363,7 @@ void aw_pocs_tv(float* img,float* dst,float alpha,const long* image_size, int ma
          // Assert
        
         if ((slices_per_split+buffer_length*2)*image_size[0]*image_size[1]* sizeof(float)!= mem_img_each_GPU){
-            mexErrMsgIdAndTxt("minimizeAwTV:POCS_TV2:GPU","Assertion Failed. Memory needed calculation broken! Please tell: ander.biguri@gmail.com\n");
+            mexErrMsgIdAndTxt("minimizeAwTV:GD_AwTV:GPU","Assertion Failed. Memory needed calculation broken! Please tell: ander.biguri@gmail.com\n");
         }
         
         
@@ -395,7 +395,7 @@ void aw_pocs_tv(float* img,float* dst,float alpha,const long* image_size, int ma
        unsigned long long buffer_pixels=buffer_length*image_size[0]*image_size[1];
         float* buffer;
         if(splits>1){
-            mexWarnMsgIdAndTxt("minimizeAwTV:POCS_TV2:Image_split","Your image can not be fully split between the available GPUs. The computation of minTV will be significantly slowed due to the image size.\nApproximated mathematics turned on for computational speed.");
+            mexWarnMsgIdAndTxt("minimizeAwTV:GD_AwTV:Image_split","Your image can not be fully split between the available GPUs. The computation of minTV will be significantly slowed due to the image size.\nApproximated mathematics turned on for computational speed.");
         }else{
             cudaMallocHost((void**)&buffer,buffer_length*image_size[0]*image_size[1]*sizeof(float));
         }
