@@ -3,12 +3,15 @@ import time
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
+
 import configparser
 ## TIGRE 
 import tigre
 import tigre.algorithms as algs
 from tigre.utilities import gpu
 
+from skimage.restoration import denoise_tv_chambolle
 
 from contextlib import contextmanager
 
@@ -51,13 +54,15 @@ def read_config_as_dict(config_path):
 
 def main():
     ######################################################
-    path = "/data/horse/ws/dchristi-TIGRE/Test9_Wuergel_2024-09-03_fly_1000msDet_00/"
+    path = "/data/horse/ws/dchristi-TIGRE/Calibr_Z200_2023-06-15__00"
     result_path = "results"
-    
-    sinogram_file = "sinogram.h5"
-    config_file = "Test9_Wuergel_2024-09-03_fly_1000msDet.config"
+    scan_name = os.path.basename(path)
+    sinogram_file = "Calibr_Z200_2023-06-15__00.sino.corr.gzip.h5"
+    config_file = "Calibr_Z200_2023-06-15_.config"
 
-    default_cmap = "plasma"
+    algorithm = "FDK"
+
+    default_cmap = "plasma_r"
     ######################################################
     
     if os.path.exists(os.path.join(path,config_file)):
@@ -81,7 +86,9 @@ def main():
         print(f"min of sinogram: {data.min()}, max of sinogram: {data.max()}")
         print(f"memory {data.nbytes/1024**2:.3f} Mbytes")
 
-        assert config_dict["CustomKeys"]["NumProjections"] != data.shape[0], "NumProjections do not match"
+        assert (
+            config_dict["CustomKeys"]["NumProjections"] == data.shape[0]
+            ), "NumProjections do not match"
 
         NumProjections = int(config_dict["CustomKeys"]["NumProjections"])
         #TODO think about wheter start angle is in degrees or radians
@@ -89,13 +96,17 @@ def main():
         theta_end = float(config_dict["CustomKeys.ProjectionMatrices"]["ScanAngle"])
 
         # print(theta_start,np.radians(theta_end),NumProjections)
-
+        data = -np.log(data / 2800)
 
         theta = np.linspace(np.radians(theta_start),np.radians(theta_end),NumProjections)
 
         fig , axs = plt.subplots(1,2,figsize=(2*4.8,4.8))
         axs = axs.flatten()
-        cax = axs[0].imshow(data[:, data.shape[1]//2, :], cmap=default_cmap, aspect='auto')
+        cax = axs[0].imshow(data[:, data.shape[1]//2, :], 
+                            cmap=default_cmap, 
+                            aspect='auto',
+                            norm=LogNorm()
+                            )
         
         axs[0].set_title(f"Sinogram ($v=${data.shape[1]//2} [Px])")
         axs[0].set_xlabel(r"$u$ [Px]")
@@ -103,7 +114,7 @@ def main():
         
         # Add a colorbar to axs[0]
         cbar = fig.colorbar(cax, ax=axs[0], orientation='vertical')
-        cbar.set_label('Intensity [16bit]')
+        cbar.set_label(r'$\log{(I)}$ [16bit]')
         # Replace y-axis with theta values
         num_ticks = 10
         tick_positions = np.linspace(0, data.shape[0] - 1, num_ticks).astype(int)
@@ -111,7 +122,11 @@ def main():
         axs[0].set_yticks(tick_positions)
         axs[0].set_yticklabels(tick_labels)
 
-        cax = axs[1].imshow(data[:, :,data.shape[2]//2], cmap=default_cmap, aspect='auto')
+        cax = axs[1].imshow(data[:, :,data.shape[2]//2], 
+                            cmap=default_cmap, 
+                            aspect='auto',
+                            norm=LogNorm()
+                            )
         
         axs[1].set_title(f"Sinogram ($u=${data.shape[2]//2} [Px])")
         axs[1].set_xlabel(r"$v$ [Px]")
@@ -119,7 +134,7 @@ def main():
         
         # Add a colorbar to axs[0]
         cbar = fig.colorbar(cax, ax=axs[1], orientation='vertical')
-        cbar.set_label('Intensity [16bit]')
+        cbar.set_label(r'$\log{(I)}$ [16bit]')
         # Replace y-axis with theta values
         num_ticks = 10
         tick_positions = np.linspace(0, data.shape[0] - 1, num_ticks).astype(int)
@@ -129,7 +144,7 @@ def main():
 
 
         fig.tight_layout()
-        fig.savefig(os.path.join(result_path,"sinogram.pdf"),dpi=300)
+        fig.savefig(os.path.join(result_path, scan_name + ".sino.pdf"),dpi=300)
 
         #TODO make it a config
         targetGpuName = 'NVIDIA A100-SXM4-40GB'  # noqa: N816  
@@ -165,19 +180,21 @@ def main():
         VoxelSizeY = float(config_dict["Volume"]["VoxelSizeY"])
         VoxelSizeZ = float(config_dict["Volume"]["VoxelSizeZ"])
         
-
+        ##TODO remove for production
         scale = 1
 
-        geo.nVoxel = np.array([SizeX,SizeY,SizeZ])//scale
-        geo.dVoxel = np.array([VoxelSizeX , VoxelSizeY, VoxelSizeZ])*scale
+        geo.nVoxel = np.array([SizeZ, SizeX,SizeY])//scale
+        geo.dVoxel = np.array([VoxelSizeZ,VoxelSizeX , VoxelSizeY])*scale
         geo.sVoxel = geo.nVoxel * geo.dVoxel
 
 
-        geo.offDetector = np.array([0,0])
+        geo.offDetector = np.array([0,0]) ##TODO is the offset per deauflt in the center?
         geo.accuracy = 0.5
         geo.mode = "cone"
-        # geo.COR = -13.611205805 * geo.dDetector[0] ## from cera software meanu can be adjusted to per angle in [mm]
 
+        ##TODO implementation per angle
+        # geo.COR = -13.611205805 * geo.dDetector[0] ## from cera software meanu can be adjusted to per angle in [mm]
+        ##TODO output of figure
         tigre.plot_geometry(geo, angle=-np.pi / 6)
     
         print("#===========Reconstruction=========================")
@@ -189,41 +206,67 @@ def main():
         print(f"voxel  size of volume: {geo.dVoxel} [mm/Px]")
 
         with time_it("Reconstructing with FDK"):
-            volFDK = algs.fdk(data, geo, theta,gpuids=gpuids)
+            vol = algs.fdk(data,             # sinogram
+                              geo,              # geometry file
+                              theta,            # angels in radians
+                              gpuids=gpuids,    # list of gpus
+                              filter="cosine"   # filter options: 'ram_lak' (default),'shepp_logan','cosine','hamming','hann'
+                              )
 
-        volFDK = volFDK.astype(np.int16)
-        print(f"shape of volume: {volFDK.shape}")
-        print(f"datatype of sinogram: {volFDK.dtype}")
-        print(f"min of volume: {volFDK.min()}, max of volume: {volFDK.max()}")
-        print(f"memory size {volFDK.nbytes/1024**2:.3f} Mbytes")
+        min_val = vol.min()
+        max_val = vol.max()
+
+        # Step 2: Rescale the data to the range of int16 [-32768, 32767]
+        # (You can adjust the target range if necessary for your specific use case)
+        vol = (vol - min_val) / (max_val - min_val)  # Normalize to [0, 1]
+        vol = vol * (2**15 - 1)  # Scale to the range [0, 32767]
+        vol = vol.astype(np.int16)  # Convert to int16
+        
+        # vol = vol.astype(np.int16)
+        print(f"shape of volume: {vol.shape}")
+        print(f"datatype of sinogram: {vol.dtype}")
+        print(f"min of volume: {vol.min()}, max of volume: {vol.max()}")
+        print(f"memory size {vol.nbytes/1024**2:.3f} Mbytes")
 
 
         fig, axs = plt.subplots(2,2, figsize=(2*4.8,2*4.8))
         axs = axs.flatten()
-        cax = axs[0].imshow(volFDK[:,:,volFDK.shape[2]//2],cmap=default_cmap,aspect='auto')
+        cax = axs[0].imshow(vol[:,:,vol.shape[2]//2],
+                            cmap=default_cmap,
+                            aspect='auto',
+                            # norm=LogNorm()
+                            )
         
-        axs[0].set_title(f"Volume ($z=${volFDK.shape[2]//2} [Px])")
-        axs[0].set_xlabel(r"$y$ [Px]")
-        axs[0].set_ylabel(r"$x$ [Px]")
+        axs[0].set_title(f"Volume ($y=${vol.shape[2]//2} [Px])")
+        axs[0].set_xlabel(r"$x$ [Px]")
+        axs[0].set_ylabel(r"$z$ [Px]")
         
         # Add a colorbar to axs[0]
         cbar = fig.colorbar(cax, ax=axs[0], orientation='vertical')
         cbar.set_label('Intensity [16bit]')
 
-        cax = axs[1].imshow(volFDK[:,volFDK.shape[1]//2,:],cmap=default_cmap,aspect='auto')
+        cax = axs[1].imshow(vol[:,vol.shape[1]//2,:],
+                            cmap=default_cmap,
+                            aspect='auto',
+                            # norm=LogNorm()
+                            )
 
-        axs[1].set_title(f"Volume ($y=${volFDK.shape[1]//2} [Px])")
-        axs[1].set_xlabel(r"$z$ [Px]")
-        axs[1].set_ylabel(r"$x$ [Px]")
+        axs[1].set_title(f"Volume ($x=${vol.shape[1]//2} [Px])")
+        axs[1].set_xlabel(r"$y$ [Px]")
+        axs[1].set_ylabel(r"$z$ [Px]")
         #    Add a colorbar to axs[1]
         cbar = fig.colorbar(cax, ax=axs[1], orientation='vertical')
         cbar.set_label('Intensity [16bit]')
 
 
-        axs[2].imshow(volFDK[volFDK.shape[0]//2,:,:],cmap=default_cmap,aspect='auto')
+        axs[2].imshow(vol[vol.shape[0]//2,:,:],
+                      cmap=default_cmap,
+                      aspect='auto',
+                    #   norm=LogNorm()
+                      )
         
-        axs[2].set_title(f"Volume ($x=${volFDK.shape[0]//2} [Px])")
-        axs[2].set_xlabel(r"$z$ [Px]")
+        axs[2].set_title(f"Volume ($z=${vol.shape[0]//2} [Px])")
+        axs[2].set_xlabel(r"$x$ [Px]")
         axs[2].set_ylabel(r"$y$ [Px]")
         #    Add a colorbar to axs[2]
         cbar = fig.colorbar(cax, ax=axs[2], orientation='vertical')
@@ -231,46 +274,44 @@ def main():
 
         ##### Histogram
 
-        # volFDK_flat = volFDK.flatten()
+        vol_flat = vol.flatten()
 
 
-        # # Plot histogram with plasma colormap, where color is based on the integer value
-        # counts, bins, patches = plt.hist(volFDK_flat, bins=10, edgecolor='white')
+        # Plot histogram with plasma colormap, where color is based on the integer value
+        counts, bins, patches = plt.hist(vol_flat, bins=10, edgecolor='white')
 
-        # #  Normalize the values for the colormap
-        # norm = plt.Normalize(vmin=min(volFDK_flat), vmax=max(volFDK_flat))
+        #  Normalize the values for the colormap
+        norm = plt.Normalize(vmin=min(vol_flat), vmax=max(vol_flat))
 
-        # # Step 5: Apply the 'plasma' colormap to the histogram bars
-        # cmap = plt.get_cmap(default_cmap)
+        # Step 5: Apply the 'plasma' colormap to the histogram bars
+        cmap = plt.get_cmap(default_cmap)
 
-        # for count, patch in zip(counts, patches):
-        #     color = cmap(norm(patch.xy[0]))  # Color based on bin start (patch.xy[0] is the bin start)
-        #     patch.set_facecolor(color)
+        for count, patch in zip(counts, patches):
+            color = cmap(norm(patch.xy[0]))  # Color based on bin start (patch.xy[0] is the bin start)
+            patch.set_facecolor(color)
 
-        # # Step 6: Add color bar for reference (pass mappable directly)
-        # sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
-        # sm.set_array([])  # No need to set array if not using an image
+        # Step 6: Add color bar for reference (pass mappable directly)
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+        sm.set_array([])  # No need to set array if not using an image
 
-        # # Step 7: Create colorbar using the mappable (sm) object
-        # plt.colorbar(sm, ax=plt.gca(), label="Integer Values")
+        # Step 7: Create colorbar using the mappable (sm) object
+        plt.colorbar(sm, ax=plt.gca(), label="Integer Values")
 
-        # # Show plot
-        # axs[3].set_xlabel("Integer Value")
-        # axs[3].set_ylabel("Frequency")
-        # axs[3].set_title("Histogram")
+        # Show plot
+        axs[3].set_xlabel("Integer Value")
+        axs[3].set_ylabel("Frequency")
+        axs[3].set_title("Histogram")
 
 
         fig.tight_layout()
-        fig.savefig(os.path.join(result_path,"reco.png"))
+        fig.savefig(os.path.join(result_path,scan_name + "." + algorithm + ".vol.pdf"),dpi=300)
     
 
-        ## save Volume
-
-        # print("#===========saving volume=========================")
-        # print(f"saving reconstruction file {os.path.join(path,'volume.h5')}")
-        # with h5py.File(os.path.join(path,'volume.h5'), 'w') as f:
-        #     # Create a dataset in the file
-        #     f.create_dataset('volume', data=volFDK,compression="gzip")
+        print("#===========saving volume=========================")
+        print(f"saving reconstruction file {os.path.join(path,scan_name + '.vol.h5')}")
+        with h5py.File(os.path.join(path,scan_name + "." + algorithm + '.vol.h5'), 'w') as f:
+            # Create a dataset in the file
+            f.create_dataset('volume', data=vol,compression="gzip")
 
 
 
