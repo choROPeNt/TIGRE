@@ -59,7 +59,7 @@ axes[0, 1].imshow(ossart[geo.nVoxel[0] // 2])
 axes[1, 1].imshow(ossart[:, geo.nVoxel[1] // 2, :])
 axes[2, 1].imshow(ossart[:, :, geo.nVoxel[2] // 2])
 plt.show()
-plt.savefig("teset.png")
+plt.savefig("test.png")
 # tigre.plotProj(proj)
 # tigre.plotImg(fdkout)
 
